@@ -58,9 +58,9 @@ export default function Home() {
             <Link href="/convert" className="btn-glow text-[14px] px-[22px] py-2.5 rounded-[9px] font-medium text-white" style={{background:"linear-gradient(135deg,#534AB7,#7F77DD)"}}>
               convert a file free
             </Link>
-            <Link href="#how-it-works" className="btn-ghost-glow text-[14px] px-[22px] py-2.5 rounded-[9px] border border-white/[0.12] text-white/55 bg-white/[0.04]">
+            <a href="#how-it-works" className="btn-ghost-glow text-[14px] px-[22px] py-2.5 rounded-[9px] border border-white/[0.12] text-white/55 bg-white/[0.04]">
               see how it works
-            </Link>
+            </a>
           </div>
         </div>
       </section>
