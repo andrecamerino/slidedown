@@ -4,9 +4,10 @@ import { useState, useRef, useCallback } from "react";
 import type { OutputFormat, ConvertResponse } from "@/types";
 import { CONTENT } from "@/lib/constants";
 import { Navbar } from "@/components/layout/Navbar";
+import { consumePendingFile } from "@/lib/pendingFile";
 
 export default function ConvertPage() {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(() => consumePendingFile());
   const [output, setOutput] = useState<string>("");
   const [slideCount, setSlideCount] = useState<number | undefined>();
   const [format, setFormat] = useState<OutputFormat>("markdown");

@@ -2,14 +2,9 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { UploadedFile } from "@/types";
+import { setPendingFile } from "@/lib/pendingFile";
 
-interface UploadZoneProps {
-  onFileReady?: (file: UploadedFile) => void;
-  redirectOnUpload?: boolean;
-}
-
-export function UploadZone({ redirectOnUpload = true }: UploadZoneProps) {
+export function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -21,19 +16,10 @@ export function UploadZone({ redirectOnUpload = true }: UploadZoneProps) {
         alert("Please upload a PDF or PowerPoint file.");
         return;
       }
-      // Store file reference in sessionStorage for converter page
-      const id = crypto.randomUUID();
-      sessionStorage.setItem("pending_file_name", file.name);
-      sessionStorage.setItem("pending_file_id", id);
-
-      if (redirectOnUpload) {
-        // Pass file via a custom event then navigate
-        const event = new CustomEvent("slidedown:file", { detail: { file, id } });
-        window.dispatchEvent(event);
-        router.push(`/convert?id=${id}`);
-      }
+      setPendingFile(file);
+      router.push("/convert");
     },
-    [redirectOnUpload, router]
+    [router]
   );
 
   const onDrop = useCallback(
