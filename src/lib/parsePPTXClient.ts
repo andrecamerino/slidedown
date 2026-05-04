@@ -1,6 +1,9 @@
 import JSZip from "jszip";
 
-export async function parsePPTXClient(file: File): Promise<{ text: string; slideCount: number }> {
+export async function parsePPTXClient(
+  file: File,
+  onProgress?: (current: number, total: number) => void,
+): Promise<{ text: string; slideCount: number }> {
   try {
     const arrayBuffer = await file.arrayBuffer();
     const zip = await JSZip.loadAsync(arrayBuffer);
@@ -14,6 +17,7 @@ export async function parsePPTXClient(file: File): Promise<{ text: string; slide
 
     const slides: string[] = [];
     for (const [index, entry] of slideEntries) {
+      onProgress?.(slides.length + 1, slideEntries.length);
       const xml = await entry.async("string");
       const texts = extractTexts(xml);
       if (texts.length > 0) {

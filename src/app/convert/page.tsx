@@ -6,6 +6,21 @@ import { CONTENT } from "@/lib/constants";
 import { consumePendingFile } from "@/lib/pendingFile";
 import { markdownToPlainText } from "@/lib/markdownToPlainText";
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+interface ConversionStats {
+  pages: number;
+  originalBytes: number;
+  outputBytes: number;
+  wordCount: number;
+  reductionPct: number;
+  fileType: "pdf" | "pptx";
+}
+
 export default function ConvertPage() {
   const [file, setFile] = useState<File | null>(() => consumePendingFile());
   const [output, setOutput] = useState<string>("");
@@ -15,6 +30,8 @@ export default function ConvertPage() {
   const [error, setError] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
+  const [conversionStats, setConversionStats] = useState<ConversionStats | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -26,6 +43,8 @@ export default function ConvertPage() {
     setFile(f);
     setOutput("");
     setError("");
+    setProgress(null);
+    setConversionStats(null);
   }, []);
 
   const convert = async () => {
@@ -33,29 +52,47 @@ export default function ConvertPage() {
     setLoading(true);
     setError("");
     setOutput("");
+    setProgress(null);
+    setConversionStats(null);
 
     try {
       const ext = file.name.split(".").pop()?.toLowerCase();
       let text = "";
       let count: number | undefined;
+      let fileType: "pdf" | "pptx" = "pdf";
 
       if (ext === "pdf") {
         const { parsePDFClient } = await import("@/lib/parsePDFClient");
-        const result = await parsePDFClient(file);
+        const result = await parsePDFClient(file, (current, total) => setProgress({ current, total }));
         text = result.text;
         count = result.pageCount;
+        fileType = "pdf";
       } else if (ext === "pptx" || ext === "ppt") {
         const { parsePPTXClient } = await import("@/lib/parsePPTXClient");
-        const result = await parsePPTXClient(file);
+        const result = await parsePPTXClient(file, (current, total) => setProgress({ current, total }));
         text = result.text;
         count = result.slideCount;
+        fileType = "pptx";
       } else {
         setError("Unsupported file type. Please upload a PDF or PPTX.");
         return;
       }
 
-      setOutput(format === "plaintext" ? markdownToPlainText(text) : text);
+      const finalText = format === "plaintext" ? markdownToPlainText(text) : text;
+      setOutput(finalText);
       setSlideCount(count);
+      setProgress(null);
+
+      const outputBytes = new TextEncoder().encode(finalText).length;
+      const reductionPct = Math.max(0, Math.round((1 - outputBytes / file.size) * 100));
+      setConversionStats({
+        pages: count ?? 0,
+        originalBytes: file.size,
+        outputBytes,
+        wordCount: finalText.split(/\s+/).filter(Boolean).length,
+        reductionPct,
+        fileType,
+      });
     } catch (err) {
       console.error("[convert]", err);
       setError("Could not convert this file. Please try again.");
@@ -137,13 +174,18 @@ export default function ConvertPage() {
               <button
                 onClick={convert}
                 disabled={loading}
-                className="btn-glow w-full text-[13px] font-medium py-2.5 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{background:"linear-gradient(135deg,#534AB7,#7F77DD)"}}
+                className={`w-full text-[13px] font-medium py-2.5 rounded-lg text-white ${loading ? "btn-convert-loading cursor-not-allowed" : "btn-glow btn-convert"}`}
               >
                 {loading ? "converting..." : "convert"}
               </button>
 
-              {output && <p className="text-[11px] text-[#5DCAA5] mt-2.5">converted successfully</p>}
+              {loading && (
+                <p className="text-[11px] text-white/30 mt-2 text-center">
+                  {progress
+                    ? `Parsing ${file.name.split(".").pop()?.toLowerCase() === "pdf" ? "page" : "slide"} ${progress.current} of ${progress.total}…`
+                    : "Parsing…"}
+                </p>
+              )}
 
               <button
                 onClick={() => { setFile(null); setOutput(""); setError(""); }}
@@ -176,6 +218,25 @@ export default function ConvertPage() {
               </div>
             )}
           </div>
+
+          {conversionStats && (
+            <div className="flex items-center gap-4 mb-3 px-3 py-2.5 rounded-lg bg-[#141418] border border-white/[0.07]">
+              <div>
+                <p className="text-[14px] font-semibold text-white leading-none">{conversionStats.pages}</p>
+                <p className="text-[10px] text-white/35 mt-0.5">{conversionStats.fileType === "pdf" ? "pages" : "slides"}</p>
+              </div>
+              <div className="w-px h-6 bg-white/[0.08] shrink-0" />
+              <div>
+                <p className="text-[14px] font-semibold text-[#5DCAA5] leading-none">{conversionStats.reductionPct}% smaller</p>
+                <p className="text-[10px] text-white/35 mt-0.5">{formatBytes(conversionStats.originalBytes)} → {formatBytes(conversionStats.outputBytes)}</p>
+              </div>
+              <div className="w-px h-6 bg-white/[0.08] shrink-0" />
+              <div>
+                <p className="text-[14px] font-semibold text-white leading-none">{conversionStats.wordCount.toLocaleString()}</p>
+                <p className="text-[10px] text-white/35 mt-0.5">words</p>
+              </div>
+            </div>
+          )}
 
           {output ? (
             <pre className="bg-[#141418] border border-white/[0.07] rounded-xl p-4 font-mono text-[11px] text-white/50 leading-relaxed overflow-auto max-h-[70vh] whitespace-pre-wrap">
