@@ -10,10 +10,13 @@ export const metadata: Metadata = {
   description: "Convert your PDF and PowerPoint lecture slides into clean text. Paste into ChatGPT, Claude, or any AI and actually get useful answers.",
 };
 
+import { Navbar } from "@/components/layout/Navbar";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Navbar />
         {children}
       </body>
     </html>
