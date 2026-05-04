@@ -9,12 +9,12 @@ You are the Dev. The PM reviews and merges all PRs. Never push directly to `main
 ---
 
 ## Tech stack
-- **Framework:** Next.js 15, App Router
+- **Framework:** Next.js 16, App Router
 - **Language:** TypeScript (strict mode)
 - **Styling:** Tailwind CSS v4 + shadcn/ui
-- **Parsers:** pdf-parse + pptx2json (Phase 1 — Python microservice swap in Phase 2)
+- **Parsers:** pdfjs-dist (client-side PDF) + jszip (client-side PPTX) — Phase 2 swaps in a Python microservice for heavier parsing
 - **Package manager:** pnpm only — never use npm
-- **Hosting:** Vercel (later)
+- **Hosting:** Vercel
 
 ---
 
@@ -32,6 +32,16 @@ fix/*       ← branch off develop for bug fixes
 - PM reviews and merges all PRs into develop
 
 ---
+
+## Deployment
+
+Vercel is connected to this repo via GitHub integration:
+- `main` → production (`yourapp.vercel.app`)
+- `develop` → staging (auto-preview URL)
+- Every PR → its own Vercel preview URL
+
+No GitHub Actions workflow is needed — Vercel handles CI/CD automatically.
+To deploy: merge develop → main via PR as usual.
 
 ## Design system
 
@@ -65,7 +75,7 @@ fix/*       ← branch off develop for bug fixes
 ```
 src/
 ├── app/
-│   ├── api/convert/route.ts     ← POST /api/convert
+│   ├── api/convert/route.ts     ← POST /api/convert (server-side, used on Vercel)
 │   ├── convert/page.tsx         ← converter UI
 │   ├── globals.css
 │   ├── layout.tsx
@@ -76,9 +86,13 @@ src/
 │   └── layout/
 │       └── Navbar.tsx
 ├── lib/
-│   ├── parsePDF.ts
-│   ├── parsePPTX.ts
-│   └── markdownToPlainText.ts
+│   ├── parsePDF.ts              ← server-side (Node.js, used by /api/convert)
+│   ├── parsePDFClient.ts        ← client-side (pdfjs-dist, browser)
+│   ├── parsePPTX.ts             ← server-side (Node.js, used by /api/convert)
+│   ├── parsePPTXClient.ts       ← client-side (jszip, browser)
+│   ├── pendingFile.ts
+│   ├── markdownToPlainText.ts
+│   └── constants.ts
 └── types/
     └── index.ts
 ```
@@ -105,12 +119,12 @@ src/
 ---
 
 ## MVP feature branch order
-1. `feature/landing-page` — dark hifi landing page with hero, stats, features, merge demo, env section
-2. `feature/pdf-converter` — PDF → markdown via /api/convert
+1. `feature/landing-page` — dark hifi landing page with hero, stats, features, merge demo, env section ✓
+2. `feature/pdf-converter` — PDF → markdown via /api/convert ✓
 3. `feature/pptx-converter` — PPTX support + slide count. Skipping for now.
-4. `feature/converter-ui` — split pane, format toggle, copy button
+4. `feature/converter-ui` — split pane, format toggle, copy button ✓
 5. `feature/merge-files` — multi-file upload + merge output. Skipping for now.
-6. `feature/highlight-extractor` — extract annotated/highlighted text from PDFs. Skipping for now.
+
 ---
 
 ## Phase roadmap

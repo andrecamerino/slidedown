@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback } from "react";
 import type { OutputFormat } from "@/types";
 import { CONTENT } from "@/lib/constants";
-import { Navbar } from "@/components/layout/Navbar";
 import { consumePendingFile } from "@/lib/pendingFile";
 import { markdownToPlainText } from "@/lib/markdownToPlainText";
 
@@ -85,9 +84,6 @@ export default function ConvertPage() {
 
   return (
     <div className="min-h-screen bg-[#0c0c0f]">
-      {/* Nav */}
-      <Navbar />
-
       {/* Toolbar */}
       <div className="border-b border-white/[0.06] bg-[#0e0e12]">
         <div className={`${CONTENT} flex items-center gap-2 py-2.5`}>
