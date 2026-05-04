@@ -3,12 +3,16 @@ import { getDocument, GlobalWorkerOptions, version } from "pdfjs-dist";
 // CDN worker avoids build-tool-specific URL resolution issues (Turbopack, Webpack, etc.)
 GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
 
-export async function parsePDFClient(file: File): Promise<{ text: string; pageCount: number }> {
+export async function parsePDFClient(
+  file: File,
+  onProgress?: (current: number, total: number) => void,
+): Promise<{ text: string; pageCount: number }> {
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
 
   const pageTexts: string[] = [];
   for (let i = 1; i <= pdf.numPages; i++) {
+    onProgress?.(i, pdf.numPages);
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
     const pageText = content.items
