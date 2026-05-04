@@ -96,7 +96,7 @@ export default function ConvertPage() {
       </div>
 
       {/* Split pane */}
-      <div className={`${CONTENT} grid grid-cols-2 divide-x divide-white/[0.06] min-h-[calc(100vh-120px)]`}>
+      <div className={`${CONTENT} grid grid-rows-1 lg:grid-cols-2 divide-x divide-white/[0.06] lg:min-h-[calc(100vh-120px)]`}>
         {/* Left — input */}
         <div className="p-4">
           <p className="text-[11px] font-medium tracking-[0.07em] uppercase text-white/30 mb-3">input</p>
