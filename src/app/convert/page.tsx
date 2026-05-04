@@ -58,6 +58,18 @@ export default function ConvertPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const downloadFile = () => {
+    const ext = format === "markdown" ? "md" : "txt";
+    const baseName = file ? file.name.replace(/\.[^.]+$/, "") : "converted";
+    const blob = new Blob([output], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${baseName}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-[#0c0c0f]">
       {/* Nav */}
@@ -147,12 +159,20 @@ export default function ConvertPage() {
           <div className="flex items-center justify-between mb-3">
             <p className="text-[11px] font-medium tracking-[0.07em] uppercase text-white/30">output</p>
             {output && (
-              <button
-                onClick={copyAll}
-                className="text-[11px] px-2.5 py-1 rounded-md bg-[rgba(127,119,221,0.2)] border border-[rgba(127,119,221,0.35)] text-[#AFA9EC] transition-all hover:bg-[rgba(127,119,221,0.3)]"
-              >
-                {copied ? "copied!" : "copy all"}
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={copyAll}
+                  className="text-[11px] px-2.5 py-1 rounded-md bg-[rgba(127,119,221,0.2)] border border-[rgba(127,119,221,0.35)] text-[#AFA9EC] transition-all hover:bg-[rgba(127,119,221,0.3)]"
+                >
+                  {copied ? "copied!" : "copy all"}
+                </button>
+                <button
+                  onClick={downloadFile}
+                  className="text-[11px] px-2.5 py-1 rounded-md border border-white/[0.12] text-white/40 bg-transparent transition-all hover:text-white/60 hover:border-white/20"
+                >
+                  download as .txt
+                </button>
+              </div>
             )}
           </div>
 
