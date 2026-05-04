@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import type { OutputFormat, ConvertResponse } from "@/types";
+import { CONTENT } from "@/lib/constants";
+import { Navbar } from "@/components/layout/Navbar";
 
 export default function ConvertPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -73,36 +75,28 @@ export default function ConvertPage() {
   return (
     <div className="min-h-screen bg-[#0c0c0f]">
       {/* Nav */}
-      <nav className="flex items-center justify-between px-7 py-4 border-b border-white/[0.07] bg-[#0c0c0f]/95 sticky top-0 z-50 backdrop-blur-sm">
-        <Link href="/" className="flex items-center gap-2 text-[15px] font-medium text-white">
-          <div className="w-[22px] h-[22px] rounded-[6px] flex items-center justify-center" style={{background:"linear-gradient(135deg,#7F77DD,#AFA9EC)"}}>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M2 3h8M2 6h6M2 9h4" />
-            </svg>
-          </div>
-          slidedown
-        </Link>
-        <span className="text-[12px] text-white/35">convert another file</span>
-      </nav>
+      <Navbar />
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-5 py-2.5 border-b border-white/[0.06] bg-[#0e0e12]">
-        {(["markdown", "plaintext"] as OutputFormat[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFormat(f)}
-            className={`text-[12px] px-3 py-1.5 rounded-lg border transition-all ${format === f ? "bg-[rgba(127,119,221,0.15)] border-[rgba(127,119,221,0.4)] text-[#AFA9EC]" : "border-white/10 text-white/40 bg-transparent hover:text-white/60"}`}
-          >
-            {f}
-          </button>
-        ))}
-        {slideCount !== undefined && (
-          <span className="ml-auto text-[12px] text-white/25">{slideCount} slides</span>
-        )}
+      <div className="border-b border-white/[0.06] bg-[#0e0e12]">
+        <div className={`${CONTENT} flex items-center gap-2 py-2.5`}>
+          {(["markdown", "plaintext"] as OutputFormat[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFormat(f)}
+              className={`text-[12px] px-3 py-1.5 rounded-lg border transition-all ${format === f ? "bg-[rgba(127,119,221,0.15)] border-[rgba(127,119,221,0.4)] text-[#AFA9EC]" : "border-white/10 text-white/40 bg-transparent hover:text-white/60"}`}
+            >
+              {f}
+            </button>
+          ))}
+          {slideCount !== undefined && (
+            <span className="ml-auto text-[12px] text-white/25">{slideCount} slides</span>
+          )}
+        </div>
       </div>
 
       {/* Split pane */}
-      <div className="grid grid-cols-2 divide-x divide-white/[0.06] min-h-[calc(100vh-120px)]">
+      <div className={`${CONTENT} grid grid-cols-2 divide-x divide-white/[0.06] min-h-[calc(100vh-120px)]`}>
         {/* Left — input */}
         <div className="p-4">
           <p className="text-[11px] font-medium tracking-[0.07em] uppercase text-white/30 mb-3">input</p>

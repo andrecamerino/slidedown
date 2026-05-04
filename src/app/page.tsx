@@ -1,8 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { UploadZone } from "@/components/converter/UploadZone";
 import Link from "next/link";
-
-const CONTENT = "max-w-[1000px] mx-auto px-6";
+import { CONTENT } from "@/lib/constants";
 
 export default function Home() {
   return (
