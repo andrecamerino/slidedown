@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import type { OutputFormat, ConvertResponse } from "@/types";
+import type { OutputFormat } from "@/types";
 import { CONTENT } from "@/lib/constants";
 import { Navbar } from "@/components/layout/Navbar";
 import { consumePendingFile } from "@/lib/pendingFile";
+import { markdownToPlainText } from "@/lib/markdownToPlainText";
 
 export default function ConvertPage() {
   const [file, setFile] = useState<File | null>(() => consumePendingFile());
@@ -34,21 +35,30 @@ export default function ConvertPage() {
     setError("");
     setOutput("");
 
-    const form = new FormData();
-    form.append("file", file);
-    form.append("format", format);
-
     try {
-      const res = await fetch("/api/convert", { method: "POST", body: form });
-      const data: ConvertResponse = await res.json();
-      if (data.success && data.output) {
-        setOutput(data.output);
-        setSlideCount(data.slideCount);
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      let text = "";
+      let count: number | undefined;
+
+      if (ext === "pdf") {
+        const { parsePDFClient } = await import("@/lib/parsePDFClient");
+        const result = await parsePDFClient(file);
+        text = result.text;
+        count = result.pageCount;
+      } else if (ext === "pptx" || ext === "ppt") {
+        const { parsePPTXClient } = await import("@/lib/parsePPTXClient");
+        const result = await parsePPTXClient(file);
+        text = result.text;
+        count = result.slideCount;
       } else {
-        setError(data.error ?? "Something went wrong.");
+        setError("Unsupported file type. Please upload a PDF or PPTX.");
+        return;
       }
+
+      setOutput(format === "plaintext" ? markdownToPlainText(text) : text);
+      setSlideCount(count);
     } catch {
-      setError("Network error. Please try again.");
+      setError("Could not convert this file. Please try again.");
     } finally {
       setLoading(false);
     }
