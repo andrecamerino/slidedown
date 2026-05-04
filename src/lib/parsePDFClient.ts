@@ -1,9 +1,7 @@
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import { getDocument, GlobalWorkerOptions, version } from "pdfjs-dist";
 
-GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+// CDN worker avoids build-tool-specific URL resolution issues (Turbopack, Webpack, etc.)
+GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
 
 export async function parsePDFClient(file: File): Promise<{ text: string; pageCount: number }> {
   const arrayBuffer = await file.arrayBuffer();

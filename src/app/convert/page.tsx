@@ -57,7 +57,8 @@ export default function ConvertPage() {
 
       setOutput(format === "plaintext" ? markdownToPlainText(text) : text);
       setSlideCount(count);
-    } catch {
+    } catch (err) {
+      console.error("[convert]", err);
       setError("Could not convert this file. Please try again.");
     } finally {
       setLoading(false);
