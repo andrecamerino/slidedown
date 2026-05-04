@@ -6,7 +6,7 @@ import { CONTENT } from "@/lib/constants";
 export function Navbar() {
   return (
     <nav className="border-b border-white/[0.07] bg-[#0c0c0f]/95 sticky top-0 z-50 backdrop-blur-sm">
-      <div className={`${CONTENT} py-4 flex items-center justify-between`}>
+      <div className={`px-6 py-4 flex items-center justify-between`}>
         <Link href="/" className="flex items-center gap-2 text-[15px] font-medium text-white">
           <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#7F77DD] to-[#AFA9EC] flex items-center justify-center">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round">
