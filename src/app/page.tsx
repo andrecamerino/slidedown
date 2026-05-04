@@ -53,7 +53,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex gap-2.5 justify-center">
+          <div className="flex flex-col lg:flex-row gap-2.5 justify-center">
             <Link href="/convert" className="btn-glow text-[14px] px-[22px] py-2.5 rounded-[9px] font-medium text-white" style={{background:"linear-gradient(135deg,#534AB7,#7F77DD)"}}>
               convert a file free
             </Link>
@@ -158,7 +158,7 @@ export default function Home() {
               <div className="flex-1 h-px bg-white/[0.07]" />
             </div>
 
-            <div className="flex items-center gap-2.5 bg-[rgba(93,202,165,0.05)] border border-[rgba(93,202,165,0.18)] rounded-lg px-[11px] py-2">
+            <div className="flex flex-col lg:flex-row items-center gap-2.5 bg-[rgba(93,202,165,0.05)] border border-[rgba(93,202,165,0.18)] rounded-lg px-[11px] py-2">
               <div className="w-[26px] h-[26px] rounded-[6px] bg-[rgba(93,202,165,0.13)] flex items-center justify-center flex-shrink-0">
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#5DCAA5" strokeWidth="1.5" strokeLinecap="round">
                   <path d="M2 2h9M2 5h7M2 8h5M2 11h6" />
