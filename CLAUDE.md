@@ -43,8 +43,6 @@ Vercel is connected to this repo via GitHub integration:
 No GitHub Actions workflow is needed — Vercel handles CI/CD automatically.
 To deploy: merge develop → main via PR as usual.
 
----
-
 ## Design system
 
 ### Colours
