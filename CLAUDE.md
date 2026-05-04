@@ -111,7 +111,6 @@ src/
 4. `feature/converter-ui` — split pane, format toggle, copy button
 5. `feature/merge-files` — multi-file upload + merge output. Skipping for now.
 6. `feature/highlight-extractor` — extract annotated/highlighted text from PDFs. Skipping for now.
-
 ---
 
 ## Phase roadmap
