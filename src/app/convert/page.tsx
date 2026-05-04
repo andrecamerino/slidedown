@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Link from "next/link";
 import type { OutputFormat, ConvertResponse } from "@/types";
 import { CONTENT } from "@/lib/constants";
 import { Navbar } from "@/components/layout/Navbar";
