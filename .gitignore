@@ -17,4 +17,5 @@ build/
 .DS_Store
 *.pem
 npm-debug.log*
+package-lock.json
 .vercel
