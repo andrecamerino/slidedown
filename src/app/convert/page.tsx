@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { OutputFormat } from "@/types";
 import { CONTENT } from "@/lib/constants";
 import { Navbar } from "@/components/layout/Navbar";
 import { consumePendingFile } from "@/lib/pendingFile";
 import { markdownToPlainText } from "@/lib/markdownToPlainText";
+import { useConversion } from "@/lib/conversionContext";
 
 export default function ConvertPage() {
+  const { setHasOutput } = useConversion();
   const [file, setFile] = useState<File | null>(() => consumePendingFile());
   const [output, setOutput] = useState<string>("");
   const [slideCount, setSlideCount] = useState<number | undefined>();
@@ -17,6 +19,10 @@ export default function ConvertPage() {
   const [copied, setCopied] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setHasOutput(output.length > 0);
+  }, [output, setHasOutput]);
 
   const handleFile = useCallback((f: File) => {
     const ext = f.name.split(".").pop()?.toLowerCase();
