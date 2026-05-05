@@ -43,8 +43,6 @@ Vercel is connected to this repo via GitHub integration:
 No GitHub Actions workflow is needed — Vercel handles CI/CD automatically.
 To deploy: merge develop → main via PR as usual.
 
----
-
 ## Design system
 
 ### Colours
@@ -126,7 +124,6 @@ src/
 3. `feature/pptx-converter` — PPTX support + slide count. Skipping for now.
 4. `feature/converter-ui` — split pane, format toggle, copy button ✓
 5. `feature/merge-files` — multi-file upload + merge output. Skipping for now.
-6. `feature/highlight-extractor` — extract annotated/highlighted text from PDFs. Skipping for now.
 
 ---
 
