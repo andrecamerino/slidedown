@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { OutputFormat } from "@/types";
 import { CONTENT } from "@/lib/constants";
 import { consumePendingFile } from "@/lib/pendingFile";
 import { markdownToPlainText } from "@/lib/markdownToPlainText";
+import { useConversion } from "@/lib/conversionContext";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -22,6 +23,7 @@ interface ConversionStats {
 }
 
 export default function ConvertPage() {
+  const { setHasOutput } = useConversion();
   const [file, setFile] = useState<File | null>(() => consumePendingFile());
   const [output, setOutput] = useState<string>("");
   const [slideCount, setSlideCount] = useState<number | undefined>();
@@ -33,6 +35,10 @@ export default function ConvertPage() {
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [conversionStats, setConversionStats] = useState<ConversionStats | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setHasOutput(output.length > 0);
+  }, [output, setHasOutput]);
 
   const handleFile = useCallback((f: File) => {
     const ext = f.name.split(".").pop()?.toLowerCase();
