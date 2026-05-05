@@ -1,7 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { CONTENT } from "@/lib/constants";
+import { usePathname, useRouter } from "next/navigation";
+import { useConversion } from "@/lib/conversionContext";
+
+function NavLink({ href, sectionId, children }: { href: string; sectionId: string; children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { hasOutput } = useConversion();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (hasOutput) {
+      const confirmed = window.confirm("You'll lose your converted file. Continue?");
+      if (!confirmed) return;
+    }
+
+    if (pathname === "/") {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      router.push(href);
+    }
+  };
+
+  return (
+    <a href={href} onClick={handleClick} className="hover:text-white/70 transition-colors">
+      {children}
+    </a>
+  );
+}
 
 export function Navbar() {
   return (
@@ -17,8 +45,8 @@ export function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-5 text-[13px] text-white/40">
-          <a href="#features" className="hover:text-white/70 transition-colors">features</a>
-          <a href="#how-it-works" className="hover:text-white/70 transition-colors">how it works</a>
+          <NavLink href="/#features" sectionId="features">features</NavLink>
+          <NavLink href="/#how-it-works" sectionId="how-it-works">how it works</NavLink>
         </div>
 
         <Link
