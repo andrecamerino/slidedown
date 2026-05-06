@@ -55,14 +55,14 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-## Roadmap
+<!-- ## Roadmap
 
 | Phase | Status | Features |
 |-------|--------|----------|
 | 1 - MVP | ✅ Done | PDF/PPTX convert, copy output, landing page |
 | 2 - Auth | Planned | Clerk login, Supabase library, usage limits |
 | 3 - AI | Planned | Flashcards, summary templates, Stripe |
-| 4 - Canvas | Planned | OAuth integration, institutional pitch |
+| 4 - Canvas | Planned | OAuth integration, institutional pitch | -->
 
 ## License
 
