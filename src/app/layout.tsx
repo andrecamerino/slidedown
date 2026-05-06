@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { ConversionProvider } from "@/lib/conversionContext";
 import { Navbar } from "@/components/layout/Navbar";
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ConversionProvider>
           <Navbar />
           {children}
+          <Analytics />
         </ConversionProvider>
       </body>
     </html>
