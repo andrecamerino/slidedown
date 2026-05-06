@@ -34,17 +34,17 @@ export function Features() {
               <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="#AFA9EC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1.5" y="2" width="5" height="6" rx="1" /><rect x="8.5" y="2" width="5" height="6" rx="1" /><path d="M4 11.5h7M7.5 8v3.5" /></svg>
             </div>
             <p className="text-[13px] font-medium text-white mb-1">merge all your lecture files</p>
-            <p className="text-[12px] text-white/35 leading-[1.6] mb-2">Combine every week&apos;s slides into one document. Search your entire semester in seconds — great for open-book exams.</p>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(127,119,221,0.13)] text-[#AFA9EC] border border-[rgba(127,119,221,0.22)]">exam season essential</span>
+            <p className="text-[12px] text-white/35 leading-[1.6] mb-2">Combine every week&apos;s slides into one document. Search your entire semester in seconds - perfect for online open-book exams.</p>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(127,119,221,0.13)] text-[#AFA9EC] border border-[rgba(127,119,221,0.22)]">coming soon...</span>
           </div>
 
           <div className="rounded-xl p-4 relative overflow-hidden border transition-all duration-200 hover:border-[rgba(127,119,221,0.3)] hover:shadow-[0_0_20px_rgba(127,119,221,0.08)] border-white/[0.07] bg-[#111115]">
             <div className="w-[30px] h-[30px] rounded-[8px] bg-[rgba(127,119,221,0.14)] border border-[rgba(127,119,221,0.25)] flex items-center justify-center mb-2.5">
               <svg width="14" height="14" viewBox="0 0 15 15" fill="none" stroke="#AFA9EC" strokeWidth="1.5" strokeLinecap="round"><circle cx="10" cy="5" r="2" /><path d="M3 5h5M3 9h9M3 13h9" /><circle cx="6" cy="9" r="1.5" /></svg>
             </div>
-            <p className="text-[13px] font-medium text-white mb-1">pull out your highlights</p>
-            <p className="text-[12px] text-white/35 leading-[1.6] mb-2">Already annotated your PDF? Extract only your highlighted text and comments into a clean summary.</p>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(127,119,221,0.13)] text-[#AFA9EC] border border-[rgba(127,119,221,0.22)]">annotations only</span>
+            <p className="text-[13px] font-medium text-white mb-1">see how much you saved</p>
+            <p className="text-[12px] text-white/35 leading-[1.6] mb-2">Once converted, you get a summary of how much storage you saved by converting to text/markdown instead of using the slides.</p>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(127,119,221,0.13)] text-[#AFA9EC] border border-[rgba(127,119,221,0.22)]">data-driven</span>
           </div>
 
           <div className="rounded-xl p-4 relative overflow-hidden border transition-all duration-200 hover:border-[rgba(127,119,221,0.3)] hover:shadow-[0_0_20px_rgba(127,119,221,0.08)] border-white/[0.07] bg-[#111115]">
