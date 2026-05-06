@@ -15,7 +15,7 @@ Most AI tools have a limit on how much text you can send at once. Lecture slides
 
 Built for students who want to use AI to study smarter: summarise a lecture, generate flashcards, ask questions about the content, or get a plain-English explanation of a tricky topic. No technical knowledge required - just drop your file in and copy the output.
 
-Works with PDF and PowerPoint files up to 50 MB. Nothing is uploaded to a server; all parsing happens in your browser.
+Works with PDF and PowerPoint files up to 50 MB. Nothing is uploaded to a server; all parsing happens in your browser - perfect for those confidential university notes and modules.
 
 ## Screenshots
 
