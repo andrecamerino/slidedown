@@ -7,9 +7,9 @@ import { LuBrainCircuit } from "react-icons/lu";
 
 import { motion } from "motion/react";
 import { CONTENT } from "@/lib/constants";
-import Feature, { FeatureProps } from "./features/Feature";
-import MergeDemo from "./features/MergeDemo";
-import CtrlFDemo from "./features/CtrlFDemo";
+import Feature, { FeatureProps } from "./Feature";
+import MergeDemo from "./MergeDemo";
+import CtrlFDemo from "./CtrlFDemo";
 
 const FeatureContent: FeatureProps[] = [
   {
