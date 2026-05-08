@@ -2,21 +2,24 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { setPendingFile } from "@/lib/pendingFile";
+import { setPendingFiles } from "@/lib/pendingFile";
 
 export function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const handleFile = useCallback(
-    (file: File) => {
-      const ext = file.name.split(".").pop()?.toLowerCase();
-      if (!["pdf", "pptx", "ppt"].includes(ext ?? "")) {
-        alert("Please upload a PDF or PowerPoint file.");
+  const handleFiles = useCallback(
+    (fileList: FileList) => {
+      const valid = Array.from(fileList).filter((f) => {
+        const ext = f.name.split(".").pop()?.toLowerCase();
+        return ["pdf", "pptx", "ppt"].includes(ext ?? "");
+      });
+      if (!valid.length) {
+        alert("Please upload PDF or PowerPoint files.");
         return;
       }
-      setPendingFile(file);
+      setPendingFiles(valid);
       router.push("/convert");
     },
     [router]
@@ -26,10 +29,9 @@ export function UploadZone() {
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
     },
-    [handleFile]
+    [handleFiles]
   );
 
   return (
@@ -67,8 +69,9 @@ export function UploadZone() {
         ref={inputRef}
         type="file"
         accept=".pdf,.pptx,.ppt"
+        multiple
         className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+        onChange={(e) => { if (e.target.files?.length) handleFiles(e.target.files); }}
       />
     </div>
   );
