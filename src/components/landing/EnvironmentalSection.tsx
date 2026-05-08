@@ -46,7 +46,7 @@ export function EnvironmentalSection() {
             </svg>
           </div>
           <p className="text-[12px] text-white/45 leading-[1.7]">
-            <strong className="text-white/75 font-medium">A note on honesty:</strong> AI energy use is real, but often overstated online. The bigger win is using AI intentionally — fewer, better prompts rather than dozens of frustrated retries. That&apos;s what Slidedown helps you do.
+            <strong className="text-white/75 font-medium">A note on honesty: </strong> AI energy use is real, but often overstated online. The bigger win is using AI intentionally — fewer, better prompts rather than dozens of frustrated retries. That&apos;s what Slidedown helps you do.
           </p>
         </div>
       </div>
