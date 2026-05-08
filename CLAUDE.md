@@ -21,7 +21,7 @@ You are the Dev. The PM reviews and merges all PRs. Never push directly to `main
 ## Branching rules
 ```
 main        ← production, never touch directly
-develop     ← staging, never touch directly
+staging     ← staging, never touch directly
 feature/*   ← branch off develop for new features
 fix/*       ← branch off develop for bug fixes
 ```
