@@ -1,11 +1,19 @@
-let pending: File | null = null;
+let pending: File[] = [];
+
+export function setPendingFiles(files: File[]): void {
+  pending = files;
+}
+
+export function consumePendingFiles(): File[] {
+  const f = pending;
+  pending = [];
+  return f;
+}
 
 export function setPendingFile(f: File): void {
-  pending = f;
+  pending = [f];
 }
 
 export function consumePendingFile(): File | null {
-  const f = pending;
-  pending = null;
-  return f;
+  return consumePendingFiles()[0] ?? null;
 }
