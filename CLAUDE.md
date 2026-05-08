@@ -36,8 +36,8 @@ fix/*       ← branch off develop for bug fixes
 ## Deployment
 
 Vercel is connected to this repo via GitHub integration:
-- `main` → production (`yourapp.vercel.app`)
-- `develop` → staging (auto-preview URL)
+- `main` → production (`slidedown-andre.vercel.app`)
+- `staging` → staging (`slidedown-staging.vercel.app`)
 - Every PR → its own Vercel preview URL
 
 No GitHub Actions workflow is needed — Vercel handles CI/CD automatically.
@@ -83,6 +83,21 @@ src/
 ├── components/
 │   ├── converter/
 │   │   └── UploadZone.tsx
+│   ├── feedback/
+│   │   └── FeedbackModal.tsx
+│   ├── landing/
+│   │   ├── enironmental/
+│   │   │   ├── EnironmentalCard.tsx
+│   │   │   └── EnvironmentalSection.tsx
+│   │   ├── features/
+│   │   │   ├── CtrlFDemo.tsx
+│   │   │   ├── Feature.tsx
+│   │   │   ├── FeatureTag.tsx
+│   │   │   ├── Features.tsx
+│   │   │   └── MergeDemo.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Hero.tsx
+│   │   └── HowItWorks.tsx
 │   └── layout/
 │       └── Navbar.tsx
 ├── lib/
@@ -90,6 +105,8 @@ src/
 │   ├── parsePDFClient.ts        ← client-side (pdfjs-dist, browser)
 │   ├── parsePPTX.ts             ← server-side (Node.js, used by /api/convert)
 │   ├── parsePPTXClient.ts       ← client-side (jszip, browser)
+│   ├── conversionContext.tsx    ← React context for conversion state
+│   ├── fadeUp.ts                ← shared scroll-triggered fade animation
 │   ├── pendingFile.ts
 │   ├── markdownToPlainText.ts
 │   └── constants.ts
