@@ -6,6 +6,7 @@ import { CONTENT } from "@/lib/constants";
 import { consumePendingFiles } from "@/lib/pendingFile";
 import { markdownToPlainText } from "@/lib/markdownToPlainText";
 import { useConversion } from "@/lib/conversionContext";
+import { FeedbackModal } from "@/components/feedback/FeedbackModal";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -35,11 +36,35 @@ export default function ConvertPage() {
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [conversionStats, setConversionStats] = useState<ConversionStats | null>(null);
   const [convertEachHinted, setConvertEachHinted] = useState(false);
+  const [showFeedbackNudge, setShowFeedbackNudge] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setHasOutput(output.length > 0);
   }, [output, setHasOutput]);
+
+  const FEEDBACK_SESSION_KEY = "slidedown_feedback_nudge_shown";
+
+  const dismissNudge = useCallback(() => {
+    setShowFeedbackNudge(false);
+    sessionStorage.setItem(FEEDBACK_SESSION_KEY, "1");
+    if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current);
+  }, []);
+
+  const triggerFeedbackNudge = useCallback(() => {
+    if (sessionStorage.getItem(FEEDBACK_SESSION_KEY)) return;
+    nudgeTimerRef.current = setTimeout(() => setShowFeedbackNudge(true), 1500);
+  }, []);
+
+  useEffect(() => {
+    if (!showFeedbackNudge) return;
+    const t = setTimeout(dismissNudge, 8000);
+    return () => clearTimeout(t);
+  }, [showFeedbackNudge, dismissNudge]);
+
+  useEffect(() => () => { if (nudgeTimerRef.current) clearTimeout(nudgeTimerRef.current); }, []);
 
   const handleFile = useCallback((f: File) => {
     const ext = f.name.split(".").pop()?.toLowerCase();
@@ -146,6 +171,7 @@ export default function ConvertPage() {
     await navigator.clipboard.writeText(output);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    triggerFeedbackNudge();
   };
 
   const downloadFile = () => {
@@ -161,6 +187,7 @@ export default function ConvertPage() {
     a.download = `${baseName}.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
+    triggerFeedbackNudge();
   };
 
   const currentFile = files[currentFileIndex];
@@ -404,6 +431,35 @@ export default function ConvertPage() {
           )}
         </div>
       </div>
+
+      {/* Feedback nudge toast */}
+      <div
+        className={`fixed bottom-4 right-4 z-40 transition-all duration-300 ${
+          showFeedbackNudge
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-3 pointer-events-none"
+        }`}
+      >
+        <div className="relative bg-[#141418] border border-white/[0.1] rounded-xl p-4 shadow-xl w-[220px]">
+          <button
+            onClick={dismissNudge}
+            className="absolute top-2.5 right-2.5 text-white/30 hover:text-white/60 transition-colors text-[15px] leading-none"
+            aria-label="Dismiss"
+          >
+            ×
+          </button>
+          <p className="text-[13px] font-medium text-white mb-1 pr-5">How was your conversion?</p>
+          <p className="text-[11px] text-white/40 mb-3">Takes 30 seconds.</p>
+          <button
+            onClick={() => { setFeedbackOpen(true); dismissNudge(); }}
+            className="w-full text-[12px] font-medium py-2 rounded-lg text-white btn-glow btn-convert"
+          >
+            share feedback
+          </button>
+        </div>
+      </div>
+
+      <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
     </div>
   );
 }
