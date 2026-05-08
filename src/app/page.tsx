@@ -1,6 +1,6 @@
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/features/Features";
-import { EnvironmentalSection } from "@/components/landing/EnvironmentalSection";
+import { EnvironmentalSection } from "@/components/landing/enironmental/EnvironmentalSection";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Footer } from "@/components/landing/Footer";
 
