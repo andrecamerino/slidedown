@@ -12,7 +12,7 @@ const fadeUp = {
 
 export function HowItWorks() {
   return (
-    <motion.section id="how-it-works" {...fadeUp} className="bg-[#0e0e12]">
+    <motion.section id="how-it-works" {...fadeUp}>
       <div className={`${CONTENT} pt-7 pb-9`}>
         <p className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#7F77DD] mb-2">why it works</p>
         <h2 className="text-[22px] font-medium text-white mb-1 tracking-[-0.02em]">Why can&apos;t I just upload my PDF directly?</h2>
