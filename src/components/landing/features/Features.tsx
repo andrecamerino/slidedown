@@ -10,6 +10,7 @@ import { CONTENT } from "@/lib/constants";
 import Feature, { FeatureProps } from "./Feature";
 import MergeDemo from "./MergeDemo";
 import CtrlFDemo from "./CtrlFDemo";
+import { fadeUp } from "@/lib/fadeUp";
 
 const FeatureContent: FeatureProps[] = [
   {
@@ -37,13 +38,6 @@ const FeatureContent: FeatureProps[] = [
     tagText: "one-click copy",
   },
 ]
-
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.15 },
-  transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as const },
-};
 
 export function Features() {
   return (
