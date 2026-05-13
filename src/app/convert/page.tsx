@@ -499,7 +499,41 @@ export default function ConvertPage() {
             </div>
           )}
 
-          {output ? (
+          {results.length > 0 ? (
+            <div className="space-y-3 overflow-auto max-h-[70vh]">
+              {results.map((result, i) => (
+                <div key={i} className="bg-[#141418] border border-white/[0.07] rounded-xl overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06]">
+                    <p className="text-[12px] font-medium text-white truncate">{result.fileName}</p>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <button
+                        onClick={() => copyResult(result.text, i)}
+                        className="text-[11px] px-2 py-1 rounded-md bg-[rgba(127,119,221,0.2)] border border-[rgba(127,119,221,0.35)] text-[#AFA9EC] transition-all hover:bg-[rgba(127,119,221,0.3)]"
+                      >
+                        {copiedIndex === i ? "copied!" : "copy"}
+                      </button>
+                      <button
+                        onClick={() => downloadResult(result)}
+                        className="text-[11px] px-2 py-1 rounded-md border border-white/[0.12] text-white/40 bg-transparent transition-all hover:text-white/60 hover:border-white/20"
+                      >
+                        .{format === "markdown" ? "md" : "txt"}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 px-3 py-2 border-b border-white/[0.06]">
+                    <span className="text-[11px] text-white/40">
+                      {result.stats.pages} {result.stats.fileType === "pdf" ? "pages" : "slides"}
+                    </span>
+                    <span className="text-[11px] text-[#5DCAA5]">{result.stats.reductionPct}% smaller</span>
+                    <span className="text-[11px] text-white/40">{result.stats.wordCount.toLocaleString()} words</span>
+                  </div>
+                  <pre className="p-3 font-mono text-[11px] text-white/50 leading-relaxed overflow-auto max-h-[200px] whitespace-pre-wrap">
+                    {result.text}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          ) : output ? (
             <pre className="bg-[#141418] border border-white/[0.07] rounded-xl p-4 font-mono text-[11px] text-white/50 leading-relaxed overflow-auto max-h-[70vh] whitespace-pre-wrap">
               {output}
             </pre>
