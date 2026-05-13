@@ -400,26 +400,25 @@ export default function ConvertPage() {
                     </div>
 
                     {/* Convert each card */}
-                    {/* TODO: implement convert-each — parse each file individually and provide separate per-file downloads */}
-                    <div className="rounded-xl border border-white/[0.07] bg-[#141418] p-3 flex flex-col">
+                    <div className="rounded-xl border border-[rgba(127,119,221,0.3)] bg-[rgba(127,119,221,0.05)] p-3 flex flex-col">
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="text-white/35 shrink-0">
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="text-[#AFA9EC] shrink-0">
                           <rect x="1.5" y="1.5" width="4" height="5" rx="0.75" />
                           <rect x="7.5" y="1.5" width="4" height="5" rx="0.75" />
                           <rect x="1.5" y="8" width="4" height="4" rx="0.75" />
                           <rect x="7.5" y="8" width="4" height="4" rx="0.75" />
                         </svg>
-                        <p className="text-[12px] font-medium text-white/60">Convert each</p>
-                        <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-[rgba(93,202,165,0.1)] border border-[rgba(93,202,165,0.2)] text-[#5DCAA5] leading-none">soon</span>
+                        <p className="text-[12px] font-medium text-white">Convert each</p>
                       </div>
-                      <p className="text-[11px] text-white/30 leading-relaxed mb-3 flex-1">
+                      <p className="text-[11px] text-white/40 leading-relaxed mb-3 flex-1">
                         Get a separate output for each file to download individually
                       </p>
                       <button
                         onClick={convertEach}
-                        className="w-full text-[12px] font-medium py-2 rounded-lg border border-white/[0.08] text-white/35 bg-transparent transition-all hover:text-white/50 hover:border-white/[0.14]"
+                        disabled={loading}
+                        className={`w-full text-[12px] font-medium py-2 rounded-lg text-white ${loading ? "btn-convert-loading cursor-not-allowed" : "btn-glow btn-convert"}`}
                       >
-                        {convertEachHinted ? "coming soon!" : "convert separately"}
+                        {loading ? `file ${currentFileIndex + 1}/${files.length}…` : "convert separately"}
                       </button>
                     </div>
                   </div>
