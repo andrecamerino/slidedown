@@ -254,6 +254,32 @@ export default function ConvertPage() {
     triggerFeedbackNudge();
   };
 
+  const copyAllResults = async () => {
+    const combined = results
+      .map((r) => `# ${r.fileName}\n\n${r.text}`)
+      .join("\n\n---\n\n");
+    await navigator.clipboard.writeText(combined);
+    setCopiedAll(true);
+    setTimeout(() => setCopiedAll(false), 2000);
+    triggerFeedbackNudge();
+  };
+
+  const downloadAllZip = async () => {
+    const { default: JSZip } = await import("jszip");
+    const zip = new JSZip();
+    const ext = format === "markdown" ? "md" : "txt";
+    results.forEach((r) => {
+      zip.file(`${r.fileName.replace(/\.[^.]+$/, "")}.${ext}`, r.text);
+    });
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "converted-files.zip";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const downloadFile = () => {
     const ext = format === "markdown" ? "md" : "txt";
     const baseName =
@@ -456,7 +482,22 @@ export default function ConvertPage() {
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[11px] font-medium tracking-[0.07em] uppercase text-white/30">output</p>
-            {output && (
+            {results.length > 0 ? (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={copyAllResults}
+                  className="text-[11px] px-2.5 py-1 rounded-md bg-[rgba(127,119,221,0.2)] border border-[rgba(127,119,221,0.35)] text-[#AFA9EC] transition-all hover:bg-[rgba(127,119,221,0.3)]"
+                >
+                  {copiedAll ? "copied!" : "copy all"}
+                </button>
+                <button
+                  onClick={downloadAllZip}
+                  className="text-[11px] px-2.5 py-1 rounded-md border border-white/[0.12] text-white/40 bg-transparent transition-all hover:text-white/60 hover:border-white/20"
+                >
+                  download all .zip
+                </button>
+              </div>
+            ) : output ? (
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={copyAll}
@@ -471,7 +512,7 @@ export default function ConvertPage() {
                   {`download as .${format === "markdown" ? "md" : "txt"}`}
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
 
           {conversionStats && (
