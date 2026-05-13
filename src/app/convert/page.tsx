@@ -23,6 +23,12 @@ interface ConversionStats {
   fileType: "pdf" | "pptx" | "mixed";
 }
 
+interface FileResult {
+  fileName: string;
+  text: string;
+  stats: ConversionStats;
+}
+
 export default function ConvertPage() {
   const { setHasOutput } = useConversion();
   const [files, setFiles] = useState<File[]>(() => consumePendingFiles());
@@ -35,15 +41,16 @@ export default function ConvertPage() {
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [conversionStats, setConversionStats] = useState<ConversionStats | null>(null);
-  const [convertEachHinted, setConvertEachHinted] = useState(false);
+  const [results, setResults] = useState<FileResult[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [showFeedbackNudge, setShowFeedbackNudge] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setHasOutput(output.length > 0);
-  }, [output, setHasOutput]);
+    setHasOutput(output.length > 0 || results.length > 0);
+  }, [output, results, setHasOutput]);
 
   const FEEDBACK_SESSION_KEY = "slidedown_feedback_nudge_shown";
 
@@ -94,6 +101,7 @@ export default function ConvertPage() {
     setLoading(true);
     setError("");
     setOutput("");
+    setResults([]);
     setProgress(null);
     setConversionStats(null);
 
@@ -161,10 +169,81 @@ export default function ConvertPage() {
     }
   };
 
-  // TODO: implement convert-each — parse each file individually and provide separate per-file downloads
-  const convertEach = () => {
-    setConvertEachHinted(true);
-    setTimeout(() => setConvertEachHinted(false), 2000);
+  const convertEach = async () => {
+    if (!files.length) return;
+    setLoading(true);
+    setError("");
+    setOutput("");
+    setResults([]);
+    setConversionStats(null);
+    setProgress(null);
+
+    try {
+      const newResults: FileResult[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        setCurrentFileIndex(i);
+        setProgress(null);
+        const ext = f.name.split(".").pop()?.toLowerCase();
+        let text = "";
+        let count = 0;
+        let fileType: "pdf" | "pptx" = "pdf";
+
+        if (ext === "pdf") {
+          const { parsePDFClient } = await import("@/lib/parsePDFClient");
+          const r = await parsePDFClient(f, (c, t) => setProgress({ current: c, total: t }));
+          text = r.text; count = r.pageCount; fileType = "pdf";
+        } else if (ext === "pptx" || ext === "ppt") {
+          const { parsePPTXClient } = await import("@/lib/parsePPTXClient");
+          const r = await parsePPTXClient(f, (c, t) => setProgress({ current: c, total: t }));
+          text = r.text; count = r.slideCount; fileType = "pptx";
+        } else {
+          setError(`Unsupported file type: ${f.name}`);
+          return;
+        }
+
+        const finalText = format === "plaintext" ? markdownToPlainText(text) : text;
+        const outputBytes = new TextEncoder().encode(finalText).length;
+        newResults.push({
+          fileName: f.name,
+          text: finalText,
+          stats: {
+            pages: count,
+            originalBytes: f.size,
+            outputBytes,
+            wordCount: finalText.split(/\s+/).filter(Boolean).length,
+            reductionPct: Math.max(0, Math.round((1 - outputBytes / f.size) * 100)),
+            fileType,
+          },
+        });
+      }
+      setResults(newResults);
+      setProgress(null);
+      triggerFeedbackNudge();
+    } catch (err) {
+      console.error("[convert-each]", err);
+      setError("Could not convert one or more files. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyResult = async (text: string, index: number) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const downloadResult = (result: FileResult) => {
+    const ext = format === "markdown" ? "md" : "txt";
+    const baseName = result.fileName.replace(/\.[^.]+$/, "");
+    const blob = new Blob([result.text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${baseName}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const copyAll = async () => {
@@ -364,7 +443,7 @@ export default function ConvertPage() {
               )}
 
               <button
-                onClick={() => { setFiles([]); setOutput(""); setError(""); setConversionStats(null); }}
+                onClick={() => { setFiles([]); setOutput(""); setError(""); setConversionStats(null); setResults([]); setCopiedIndex(null); }}
                 className="text-[12px] text-white/30 hover:text-white/50 mt-3 transition-colors block"
               >
                 clear all
