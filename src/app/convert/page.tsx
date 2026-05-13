@@ -43,6 +43,7 @@ export default function ConvertPage() {
   const [conversionStats, setConversionStats] = useState<ConversionStats | null>(null);
   const [results, setResults] = useState<FileResult[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedAll, setCopiedAll] = useState(false);
   const [showFeedbackNudge, setShowFeedbackNudge] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -500,6 +501,30 @@ export default function ConvertPage() {
 
           {results.length > 0 ? (
             <div className="space-y-3 overflow-auto max-h-[70vh]">
+              {(() => {
+                const totalOriginalBytes = results.reduce((s, r) => s + r.stats.originalBytes, 0);
+                const totalOutputBytes = results.reduce((s, r) => s + r.stats.outputBytes, 0);
+                const totalWords = results.reduce((s, r) => s + r.stats.wordCount, 0);
+                const totalReduction = Math.max(0, Math.round((1 - totalOutputBytes / totalOriginalBytes) * 100));
+                return (
+                  <div className="flex items-center gap-4 px-3 py-2.5 rounded-lg bg-[#141418] border border-white/[0.07]">
+                    <div>
+                      <p className="text-[14px] font-semibold text-white leading-none">{results.length}</p>
+                      <p className="text-[10px] text-white/35 mt-0.5">files</p>
+                    </div>
+                    <div className="w-px h-6 bg-white/[0.08] shrink-0" />
+                    <div>
+                      <p className="text-[14px] font-semibold text-[#5DCAA5] leading-none">{totalReduction}% smaller</p>
+                      <p className="text-[10px] text-white/35 mt-0.5">{formatBytes(totalOriginalBytes)} → {formatBytes(totalOutputBytes)}</p>
+                    </div>
+                    <div className="w-px h-6 bg-white/[0.08] shrink-0" />
+                    <div>
+                      <p className="text-[14px] font-semibold text-white leading-none">{totalWords.toLocaleString()}</p>
+                      <p className="text-[10px] text-white/35 mt-0.5">words</p>
+                    </div>
+                  </div>
+                );
+              })()}
               {results.map((result, i) => (
                 <div key={i} className="bg-[#141418] border border-white/[0.07] rounded-xl overflow-hidden">
                   <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06]">
