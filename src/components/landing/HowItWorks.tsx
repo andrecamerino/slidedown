@@ -2,17 +2,11 @@
 
 import { motion } from "motion/react";
 import { CONTENT } from "@/lib/constants";
-
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.15 },
-  transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as const },
-};
+import { fadeUp } from "@/lib/fadeUp";
 
 export function HowItWorks() {
   return (
-    <motion.section id="how-it-works" {...fadeUp} className="bg-[#0e0e12]">
+    <motion.section id="how-it-works" {...fadeUp}>
       <div className={`${CONTENT} pt-7 pb-9`}>
         <p className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#7F77DD] mb-2">why it works</p>
         <h2 className="text-[22px] font-medium text-white mb-1 tracking-[-0.02em]">Why can&apos;t I just upload my PDF directly?</h2>

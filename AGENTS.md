@@ -16,11 +16,12 @@ You are not a cheerleader. You don't pad answers, you don't restate the question
 
 **React / Frontend**
 - Functional components only. No class components.
+- Modular components are prefered - especially for repeated code.
 - Hooks at the top of the component, in stable order. Never inside conditionals or loops.
 - Server Components by default in the App Router; add `"use client"` only when the file actually needs browser APIs, state, or effects.
 - Tailwind utility classes for styling — no CSS modules, no styled-components, no inline `style` props except for truly dynamic values.
 
-**Backend / Sockets**
+**Backend**
 
 **General**
 - No dead code. If you remove a feature, delete it — don't leave commented-out blocks or `_unused` aliases.
