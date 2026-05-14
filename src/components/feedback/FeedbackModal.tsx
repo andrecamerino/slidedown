@@ -139,7 +139,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                   onMouseEnter={() => setHoveredRating(n)}
                   onMouseLeave={() => setHoveredRating(0)}
                   onClick={() => setRating(n)}
-                  className={`text-2xl transition-colors leading-none ${
+                  className={`text-2xl transition-colors leading-none cursor-pointer ${
                     n <= (hoveredRating || rating) ? "text-[#7F77DD]" : "text-white/20"
                   }`}
                 >
@@ -181,7 +181,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               onChange={(e) => setFrequency(e.target.value)}
               className="w-full bg-[#141418] border border-white/[0.07] rounded-lg px-3 py-2.5 text-[13px] text-white focus:outline-none focus:border-[#7F77DD]/40 transition-colors appearance-none cursor-pointer"
             >
-              <option value="" disabled className="bg-[#141418] text-white/40">select one...</option>
+              <option value="" disabled className="bg-[#141418] text-white/40 ">select one...</option>
               <option value="Daily" className="bg-[#141418] text-white">daily</option>
               <option value="A few times a week" className="bg-[#141418] text-white">a few times a week</option>
               <option value="Occasionally" className="bg-[#141418] text-white">occasionally</option>
@@ -203,7 +203,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                   className={`flex-1 py-2 rounded-lg text-[13px] border transition-colors ${
                     returnIntent === opt
                       ? "border-[#7F77DD]/50 bg-[#7F77DD]/10 text-white"
-                      : "border-white/[0.07] text-white/40 hover:text-white/60 hover:border-white/20"
+                      : "border-white/[0.07] text-white/40 hover:text-white/60 hover:border-white/20 cursor-pointer"
                   }`}
                 >
                   {opt.toLowerCase()}
@@ -230,7 +230,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           <button
             type="submit"
             disabled={submitting}
-            className="btn-convert text-white text-[13px] font-medium py-2.5 rounded-lg disabled:opacity-50 transition-opacity"
+            className="btn-convert text-white text-[13px] font-medium py-2.5 rounded-lg hover:opacity-75 cursor-pointer"
           >
             {submitting ? "sending..." : "send feedback"}
           </button>
