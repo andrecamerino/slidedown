@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IoIosArrowDown } from "react-icons/io";
 
 interface FeedbackModalProps {
   open: boolean;
@@ -176,17 +177,28 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           {/* Frequency */}
           <div>
             <label className="text-white/55 text-[13px] block mb-2">how often do you use slidedown?</label>
+            <div className="relative">
             <select
               value={frequency}
               onChange={(e) => setFrequency(e.target.value)}
-              className="w-full bg-[#141418] border border-white/[0.07] rounded-lg px-3 py-2.5 text-[13px] text-white focus:outline-none focus:border-[#7F77DD]/40 transition-colors appearance-none cursor-pointer"
+              className="w-full bg-[#141418] border border-white/[0.07] rounded-lg px-3 pr-8 py-2.5 text-[13px] text-white focus:outline-none focus:border-[#7F77DD]/40 transition-colors appearance-none cursor-pointer"
             >
-              <option value="" disabled className="bg-[#141418] text-white/40 ">select one...</option>
+              <option value="" disabled className="bg-[#141418] text-white/40">
+                select one...
+              </option>
               <option value="Daily" className="bg-[#141418] text-white">daily</option>
               <option value="A few times a week" className="bg-[#141418] text-white">a few times a week</option>
               <option value="Occasionally" className="bg-[#141418] text-white">occasionally</option>
               <option value="First time" className="bg-[#141418] text-white">first time</option>
             </select>
+            <svg
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/30"
+              width="12" height="12" viewBox="0 0 12 12" fill="none"
+              stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="2 4 6 8 10 4" />
+            </svg>
+            </div>
           </div>
 
           {/* Return intent */}
