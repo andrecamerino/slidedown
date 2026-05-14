@@ -122,7 +122,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           <h2 className="text-white text-[17px] font-semibold">share your thoughts</h2>
           <button
             onClick={onClose}
-            className="text-white/30 hover:text-white/60 transition-colors text-2xl leading-none w-7 h-7 flex items-center justify-center"
+            className="text-white/30 hover:text-white/60 transition-colors text-2xl leading-none w-7 h-7 flex items-center justify-center cursor-pointer"
           >
             ×
           </button>
