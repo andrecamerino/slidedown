@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IoIosArrowDown } from "react-icons/io";
 
 interface FeedbackModalProps {
   open: boolean;
@@ -18,29 +17,40 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [confirmingClose, setConfirmingClose] = useState(false);
+
+  const hasContent = rating > 0 || !!well || !!better || !!frequency || !!returnIntent || !!email;
+
+  const handleClose = () => {
+    if (hasContent) {
+      setConfirmingClose(true);
+    } else {
+      onClose();
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, hasContent]);
 
-  // Reset form when modal closes
   useEffect(() => {
-    if (!open) {
-      setRating(0);
-      setHoveredRating(0);
-      setWell("");
-      setBetter("");
-      setFrequency("");
-      setReturnIntent("");
-      setEmail("");
-      setSubmitting(false);
-      setSubmitted(false);
-    }
+    if (open) return;
+    setRating(0);
+    setHoveredRating(0);
+    setWell("");
+    setBetter("");
+    setFrequency("");
+    setReturnIntent("");
+    setEmail("");
+    setSubmitting(false);
+    setSubmitted(false);
+    setConfirmingClose(false);
   }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,10 +119,41 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
     );
   }
 
+  if (confirmingClose) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        onClick={() => setConfirmingClose(false)}
+      >
+        <div
+          className="bg-[#111115] border border-white/[0.07] rounded-2xl p-8 max-w-sm w-full mx-4 text-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="text-white text-[17px] font-semibold mb-2">discard your feedback?</h2>
+          <p className="text-white/40 text-[13px] mb-6">everything you&apos;ve typed will be lost.</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setConfirmingClose(false)}
+              className="flex-1 py-2.5 rounded-lg text-[13px] border border-white/[0.07] text-white/55 hover:text-white/80 hover:border-white/20 transition-colors cursor-pointer"
+            >
+              keep editing
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-lg text-[13px] border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+            >
+              discard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="bg-[#111115] border border-white/[0.07] rounded-2xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -121,7 +162,7 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-white text-[17px] font-semibold">share your thoughts</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-white/30 hover:text-white/60 transition-colors text-2xl leading-none w-7 h-7 flex items-center justify-center cursor-pointer"
           >
             ×
@@ -178,26 +219,26 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           <div>
             <label className="text-white/55 text-[13px] block mb-2">how often do you use slidedown?</label>
             <div className="relative">
-            <select
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-              className="w-full bg-[#141418] border border-white/[0.07] rounded-lg px-3 pr-8 py-2.5 text-[13px] text-white focus:outline-none focus:border-[#7F77DD]/40 transition-colors appearance-none cursor-pointer"
-            >
-              <option value="" disabled className="bg-[#141418] text-white/40">
-                select one...
-              </option>
-              <option value="Daily" className="bg-[#141418] text-white">daily</option>
-              <option value="A few times a week" className="bg-[#141418] text-white">a few times a week</option>
-              <option value="Occasionally" className="bg-[#141418] text-white">occasionally</option>
-              <option value="First time" className="bg-[#141418] text-white">first time</option>
-            </select>
-            <svg
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/30"
-              width="12" height="12" viewBox="0 0 12 12" fill="none"
-              stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <polyline points="2 4 6 8 10 4" />
-            </svg>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                className="w-full bg-[#141418] border border-white/[0.07] rounded-lg px-3 pr-8 py-2.5 text-[13px] text-white focus:outline-none focus:border-[#7F77DD]/40 transition-colors appearance-none cursor-pointer"
+              >
+                <option value="" disabled className="bg-[#141418] text-white/40">
+                  select one...
+                </option>
+                <option value="Daily" className="bg-[#141418] text-white">daily</option>
+                <option value="A few times a week" className="bg-[#141418] text-white">a few times a week</option>
+                <option value="Occasionally" className="bg-[#141418] text-white">occasionally</option>
+                <option value="First time" className="bg-[#141418] text-white">first time</option>
+              </select>
+              <svg
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/30"
+                width="12" height="12" viewBox="0 0 12 12" fill="none"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <polyline points="2 4 6 8 10 4" />
+              </svg>
             </div>
           </div>
 
