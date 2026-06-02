@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { ConversionProvider } from "@/lib/conversionContext";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ConversionProvider>
           <Navbar />
           {children}
+          <Footer />
           <Analytics />
         </ConversionProvider>
       </body>

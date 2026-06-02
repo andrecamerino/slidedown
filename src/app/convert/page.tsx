@@ -23,6 +23,12 @@ interface ConversionStats {
   fileType: "pdf" | "pptx" | "mixed";
 }
 
+interface FileResult {
+  fileName: string;
+  text: string;
+  stats: ConversionStats;
+}
+
 export default function ConvertPage() {
   const { setHasOutput } = useConversion();
   const [files, setFiles] = useState<File[]>(() => consumePendingFiles());
@@ -35,15 +41,17 @@ export default function ConvertPage() {
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [conversionStats, setConversionStats] = useState<ConversionStats | null>(null);
-  const [convertEachHinted, setConvertEachHinted] = useState(false);
+  const [results, setResults] = useState<FileResult[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedAll, setCopiedAll] = useState(false);
   const [showFeedbackNudge, setShowFeedbackNudge] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const nudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setHasOutput(output.length > 0);
-  }, [output, setHasOutput]);
+    setHasOutput(output.length > 0 || results.length > 0);
+  }, [output, results, setHasOutput]);
 
   const FEEDBACK_SESSION_KEY = "slidedown_feedback_nudge_shown";
 
@@ -94,6 +102,7 @@ export default function ConvertPage() {
     setLoading(true);
     setError("");
     setOutput("");
+    setResults([]);
     setProgress(null);
     setConversionStats(null);
 
@@ -161,10 +170,81 @@ export default function ConvertPage() {
     }
   };
 
-  // TODO: implement convert-each — parse each file individually and provide separate per-file downloads
-  const convertEach = () => {
-    setConvertEachHinted(true);
-    setTimeout(() => setConvertEachHinted(false), 2000);
+  const convertEach = async () => {
+    if (!files.length) return;
+    setLoading(true);
+    setError("");
+    setOutput("");
+    setResults([]);
+    setConversionStats(null);
+    setProgress(null);
+
+    try {
+      const newResults: FileResult[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        setCurrentFileIndex(i);
+        setProgress(null);
+        const ext = f.name.split(".").pop()?.toLowerCase();
+        let text = "";
+        let count = 0;
+        let fileType: "pdf" | "pptx" = "pdf";
+
+        if (ext === "pdf") {
+          const { parsePDFClient } = await import("@/lib/parsePDFClient");
+          const r = await parsePDFClient(f, (c, t) => setProgress({ current: c, total: t }));
+          text = r.text; count = r.pageCount; fileType = "pdf";
+        } else if (ext === "pptx" || ext === "ppt") {
+          const { parsePPTXClient } = await import("@/lib/parsePPTXClient");
+          const r = await parsePPTXClient(f, (c, t) => setProgress({ current: c, total: t }));
+          text = r.text; count = r.slideCount; fileType = "pptx";
+        } else {
+          setError(`Unsupported file type: ${f.name}`);
+          return;
+        }
+
+        const finalText = format === "plaintext" ? markdownToPlainText(text) : text;
+        const outputBytes = new TextEncoder().encode(finalText).length;
+        newResults.push({
+          fileName: f.name,
+          text: finalText,
+          stats: {
+            pages: count,
+            originalBytes: f.size,
+            outputBytes,
+            wordCount: finalText.split(/\s+/).filter(Boolean).length,
+            reductionPct: Math.max(0, Math.round((1 - outputBytes / f.size) * 100)),
+            fileType,
+          },
+        });
+      }
+      setResults(newResults);
+      setProgress(null);
+      triggerFeedbackNudge();
+    } catch (err) {
+      console.error("[convert-each]", err);
+      setError("Could not convert one or more files. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyResult = async (text: string, index: number) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const downloadResult = (result: FileResult) => {
+    const ext = format === "markdown" ? "md" : "txt";
+    const baseName = result.fileName.replace(/\.[^.]+$/, "");
+    const blob = new Blob([result.text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${baseName}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const copyAll = async () => {
@@ -172,6 +252,32 @@ export default function ConvertPage() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     triggerFeedbackNudge();
+  };
+
+  const copyAllResults = async () => {
+    const combined = results
+      .map((r) => `# ${r.fileName}\n\n${r.text}`)
+      .join("\n\n---\n\n");
+    await navigator.clipboard.writeText(combined);
+    setCopiedAll(true);
+    setTimeout(() => setCopiedAll(false), 2000);
+    triggerFeedbackNudge();
+  };
+
+  const downloadAllZip = async () => {
+    const { default: JSZip } = await import("jszip");
+    const zip = new JSZip();
+    const ext = format === "markdown" ? "md" : "txt";
+    results.forEach((r) => {
+      zip.file(`${r.fileName.replace(/\.[^.]+$/, "")}.${ext}`, r.text);
+    });
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "converted-files.zip";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const downloadFile = () => {
@@ -321,26 +427,25 @@ export default function ConvertPage() {
                     </div>
 
                     {/* Convert each card */}
-                    {/* TODO: implement convert-each — parse each file individually and provide separate per-file downloads */}
-                    <div className="rounded-xl border border-white/[0.07] bg-[#141418] p-3 flex flex-col">
+                    <div className="rounded-xl border border-[rgba(127,119,221,0.3)] bg-[rgba(127,119,221,0.05)] p-3 flex flex-col">
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="text-white/35 shrink-0">
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="text-[#AFA9EC] shrink-0">
                           <rect x="1.5" y="1.5" width="4" height="5" rx="0.75" />
                           <rect x="7.5" y="1.5" width="4" height="5" rx="0.75" />
                           <rect x="1.5" y="8" width="4" height="4" rx="0.75" />
                           <rect x="7.5" y="8" width="4" height="4" rx="0.75" />
                         </svg>
-                        <p className="text-[12px] font-medium text-white/60">Convert each</p>
-                        <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-[rgba(93,202,165,0.1)] border border-[rgba(93,202,165,0.2)] text-[#5DCAA5] leading-none">soon</span>
+                        <p className="text-[12px] font-medium text-white">Convert each</p>
                       </div>
-                      <p className="text-[11px] text-white/30 leading-relaxed mb-3 flex-1">
+                      <p className="text-[11px] text-white/40 leading-relaxed mb-3 flex-1">
                         Get a separate output for each file to download individually
                       </p>
                       <button
                         onClick={convertEach}
-                        className="w-full text-[12px] font-medium py-2 rounded-lg border border-white/[0.08] text-white/35 bg-transparent transition-all hover:text-white/50 hover:border-white/[0.14]"
+                        disabled={loading}
+                        className={`w-full text-[12px] font-medium py-2 rounded-lg text-white ${loading ? "btn-convert-loading cursor-not-allowed" : "btn-glow btn-convert"}`}
                       >
-                        {convertEachHinted ? "coming soon!" : "convert separately"}
+                        {loading ? `file ${currentFileIndex + 1}/${files.length}…` : "convert separately"}
                       </button>
                     </div>
                   </div>
@@ -364,7 +469,7 @@ export default function ConvertPage() {
               )}
 
               <button
-                onClick={() => { setFiles([]); setOutput(""); setError(""); setConversionStats(null); }}
+                onClick={() => { setFiles([]); setOutput(""); setError(""); setConversionStats(null); setResults([]); setCopiedIndex(null); }}
                 className="text-[12px] text-white/30 hover:text-white/50 mt-3 transition-colors block"
               >
                 clear all
@@ -377,7 +482,22 @@ export default function ConvertPage() {
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[11px] font-medium tracking-[0.07em] uppercase text-white/30">output</p>
-            {output && (
+            {results.length > 0 ? (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={copyAllResults}
+                  className="text-[11px] px-2.5 py-1 rounded-md bg-[rgba(127,119,221,0.2)] border border-[rgba(127,119,221,0.35)] text-[#AFA9EC] transition-all hover:bg-[rgba(127,119,221,0.3)]"
+                >
+                  {copiedAll ? "copied!" : "copy all"}
+                </button>
+                <button
+                  onClick={downloadAllZip}
+                  className="text-[11px] px-2.5 py-1 rounded-md border border-white/[0.12] text-white/40 bg-transparent transition-all hover:text-white/60 hover:border-white/20"
+                >
+                  download all .zip
+                </button>
+              </div>
+            ) : output ? (
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={copyAll}
@@ -392,7 +512,7 @@ export default function ConvertPage() {
                   {`download as .${format === "markdown" ? "md" : "txt"}`}
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
 
           {conversionStats && (
@@ -420,7 +540,65 @@ export default function ConvertPage() {
             </div>
           )}
 
-          {output ? (
+          {results.length > 0 ? (
+            <div className="space-y-3 overflow-auto max-h-[70vh]">
+              {(() => {
+                const totalOriginalBytes = results.reduce((s, r) => s + r.stats.originalBytes, 0);
+                const totalOutputBytes = results.reduce((s, r) => s + r.stats.outputBytes, 0);
+                const totalWords = results.reduce((s, r) => s + r.stats.wordCount, 0);
+                const totalReduction = Math.max(0, Math.round((1 - totalOutputBytes / totalOriginalBytes) * 100));
+                return (
+                  <div className="flex items-center gap-4 px-3 py-2.5 rounded-lg bg-[#141418] border border-white/[0.07]">
+                    <div>
+                      <p className="text-[14px] font-semibold text-white leading-none">{results.length}</p>
+                      <p className="text-[10px] text-white/35 mt-0.5">files</p>
+                    </div>
+                    <div className="w-px h-6 bg-white/[0.08] shrink-0" />
+                    <div>
+                      <p className="text-[14px] font-semibold text-[#5DCAA5] leading-none">{totalReduction}% smaller</p>
+                      <p className="text-[10px] text-white/35 mt-0.5">{formatBytes(totalOriginalBytes)} → {formatBytes(totalOutputBytes)}</p>
+                    </div>
+                    <div className="w-px h-6 bg-white/[0.08] shrink-0" />
+                    <div>
+                      <p className="text-[14px] font-semibold text-white leading-none">{totalWords.toLocaleString()}</p>
+                      <p className="text-[10px] text-white/35 mt-0.5">words</p>
+                    </div>
+                  </div>
+                );
+              })()}
+              {results.map((result, i) => (
+                <div key={i} className="bg-[#141418] border border-white/[0.07] rounded-xl overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06]">
+                    <p className="text-[12px] font-medium text-white truncate">{result.fileName}</p>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <button
+                        onClick={() => copyResult(result.text, i)}
+                        className="text-[11px] px-2 py-1 rounded-md bg-[rgba(127,119,221,0.2)] border border-[rgba(127,119,221,0.35)] text-[#AFA9EC] transition-all hover:bg-[rgba(127,119,221,0.3)]"
+                      >
+                        {copiedIndex === i ? "copied!" : "copy"}
+                      </button>
+                      <button
+                        onClick={() => downloadResult(result)}
+                        className="text-[11px] px-2 py-1 rounded-md border border-white/[0.12] text-white/40 bg-transparent transition-all hover:text-white/60 hover:border-white/20"
+                      >
+                        .{format === "markdown" ? "md" : "txt"}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 px-3 py-2 border-b border-white/[0.06]">
+                    <span className="text-[11px] text-white/40">
+                      {result.stats.pages} {result.stats.fileType === "pdf" ? "pages" : "slides"}
+                    </span>
+                    <span className="text-[11px] text-[#5DCAA5]">{result.stats.reductionPct}% smaller</span>
+                    <span className="text-[11px] text-white/40">{result.stats.wordCount.toLocaleString()} words</span>
+                  </div>
+                  <pre className="p-3 font-mono text-[11px] text-white/50 leading-relaxed overflow-auto max-h-[200px] whitespace-pre-wrap">
+                    {result.text}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          ) : output ? (
             <pre className="bg-[#141418] border border-white/[0.07] rounded-xl p-4 font-mono text-[11px] text-white/50 leading-relaxed overflow-auto max-h-[70vh] whitespace-pre-wrap">
               {output}
             </pre>
